@@ -22,53 +22,64 @@ mlagents-learn config.yaml --run-id=move-to-target --train
 ```  
 ### Program:
 ```
-using Unity.MLAgents;
-using Unity.MLAgents.Actuators;
-using Unity.MLAgents.Sensors;
+using System.Collections.Generic;
 using UnityEngine;
-
-public class MoveToTargetAgent : Agent
+using Unity.MLAgents;
+using Unity.MLAgents.Sensors;
+using Unity.MLAgents.Actuators;
+public class RollerAgent : Agent
 {
-    public Transform targetTransform;
-    private Rigidbody agentRb;
-
-    public override void Initialize()
+    private Rigidbody rBody;
+    void Start()
     {
-        agentRb = GetComponent<Rigidbody>();
+        rBody = GetComponent<Rigidbody>();
     }
 
+    public Transform Target;
     public override void OnEpisodeBegin()
     {
-        // Reset agent and target position
-        agentRb.velocity = Vector3.zero;
-        transform.localPosition = new Vector3(Random.Range(-4f, 4f), 0.5f, Random.Range(-4f, 4f));
-        targetTransform.localPosition = new Vector3(Random.Range(-4f, 4f), 0.5f, Random.Range(-4f, 4f));
+        if (this.transform.localPosition.y < 0)
+        {
+            // If the Agent fell, zero its momentum
+            this.rBody.angularVelocity = Vector3.zero;
+            this.rBody.velocity = Vector3.zero;
+            this.transform.localPosition = new Vector3(0, 0.5f, 0);
+        }
+
+        // Move the target to a new spot
+        Target.localPosition = new Vector3(Random.value * 8 - 4,
+                                           0.5f,
+                                           Random.value * 8 - 4);
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Positions
-        sensor.AddObservation(transform.localPosition);
-        sensor.AddObservation(targetTransform.localPosition);
+        // Target and Agent positions
+        sensor.AddObservation(Target.localPosition);
+        sensor.AddObservation(this.transform.localPosition);
+
         // Agent velocity
-        sensor.AddObservation(agentRb.velocity);
+        sensor.AddObservation(rBody.velocity.x);
+        sensor.AddObservation(rBody.velocity.z);
     }
 
-    public override void OnActionReceived(ActionBuffers actions)
+    public float speed = 10;
+    public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        Vector3 move = new Vector3(actions.ContinuousActions[0], 0, actions.ContinuousActions[1]);
-        agentRb.AddForce(move * 10);
+        Vector3 controlSignal = Vector3.zero;
+        controlSignal.x = actionBuffers.ContinuousActions[0];
+        controlSignal.z = actionBuffers.ContinuousActions[1];
+        rBody.AddForce(controlSignal * speed);
 
-        // Reward
-        float distanceToTarget = Vector3.Distance(transform.localPosition, targetTransform.localPosition);
-        if (distanceToTarget < 1.2f)
+        float distanceToTarget = Vector3.Distance(this.transform.localPosition, Target.localPosition);
+
+        if (distanceToTarget < 1.42f)
         {
             SetReward(1.0f);
             EndEpisode();
         }
 
-        // Fail condition
-        if (transform.localPosition.y < 0)
+        if (this.transform.localPosition.y < 0)
         {
             EndEpisode();
         }
@@ -76,34 +87,10 @@ public class MoveToTargetAgent : Agent
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        var cont = actionsOut.ContinuousActions;
-        cont[0] = Input.GetAxis("Horizontal");
-        cont[1] = Input.GetAxis("Vertical");
+        actionsOut.ContinuousActions.Array[0] = Input.GetAxis("Horizontal");
+        actionsOut.ContinuousActions.Array[1] = Input.GetAxis("Vertical");
     }
 }
-config .yaml
-behaviors:
-  MoveToTarget:
-    trainer_type: ppo
-    max_steps: 50000
-    time_horizon: 64
-    summary_freq: 1000
-    hyperparameters:
-      batch_size: 64
-      buffer_size: 2048
-      learning_rate: 3.0e-4
-      beta: 5.0e-4
-      epsilon: 0.2
-      lambd: 0.95
-      num_epoch: 3
-    network_settings:
-      normalize: false
-      hidden_units: 128
-      num_layers: 2
-    reward_signals:
-      extrinsic:
-        gamma: 0.99
-        strength: 1.0
 ```
 ### Output:
 
