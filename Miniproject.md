@@ -1,6 +1,6 @@
 # Ex.No: 10  Implementation of 2D game 
 ### DATE: 19.05.2025                                                                           
-### REGISTER NUMBER : 212223240112
+### REGISTER NUMBER : 212222243003
 ### AIM:
 To develop an interactive 2D platformer game in Unity
 ### Algorithm:
