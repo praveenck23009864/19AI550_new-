@@ -6,12 +6,29 @@ To develop an interactive 2D platformer game in Unity
 ### Algorithm:
 
 1.Create a new 2D Unity project and import your assets (player, tiles, background, coins).
+
+
+
+
 2.Design the level layout using Tilemap or platform prefabs inside a new scene.
+
+
 3.Create the Player GameObject with a Sprite Renderer, Rigidbody2D, and BoxCollider2D.
+
+
 4.Write and attach a player movement script to handle walking and jumping.
+
+
+
 5.Implement ground detection using an empty child object and Physics2D overlap checks.
+
+
 6.Set up coin GameObjects with Trigger colliders and add a coin collection script.
+
+
 7.Add a camera follow script to smoothly follow the player’s movement.
+
+
 8.Test gameplay, fix issues (e.g., “isGrounded” warning), and build the game.
   
 ### Program:
