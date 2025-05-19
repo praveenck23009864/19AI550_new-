@@ -107,6 +107,7 @@ behaviors:
 ```
 ### Output:
 
+![WhatsApp Image 2025-05-19 at 13 25 54_70897c03](https://github.com/user-attachments/assets/a6155c9e-56c0-46cd-8ebb-1d08860e0968)
 
 
 
